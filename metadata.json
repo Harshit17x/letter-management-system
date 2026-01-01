@@ -1,0 +1,7 @@
+{
+  "name": "Letter Management System(LMS)",
+  "description": "A sophisticated application for creating, managing, and enhancing office letters using templates, variables, and powerful AI assistance powered by the Gemini API.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
