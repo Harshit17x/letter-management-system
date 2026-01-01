@@ -14,6 +14,27 @@ interface AiAssistantProps {
     disabled: boolean;
 }
 
+interface AccordionSectionProps {
+    title: string;
+    id: string;
+    children: React.ReactNode;
+    activeAccordion: string | null;
+    setActiveAccordion: (id: string | null) => void;
+}
+
+const AccordionSection: React.FC<AccordionSectionProps> = ({ title, id, children, activeAccordion, setActiveAccordion }) => (
+    <div className="border-b border-slate-200 dark:border-slate-700">
+        <button
+            onClick={() => setActiveAccordion(activeAccordion === id ? null : id)}
+            className="w-full flex justify-between items-center p-4 text-left font-semibold"
+        >
+            <span>{title}</span>
+            <ChevronDownIcon className={`w-5 h-5 transition-transform ${activeAccordion === id ? 'rotate-180' : ''}`} />
+        </button>
+        {activeAccordion === id && <div className="p-4 pt-0">{children}</div>}
+    </div>
+);
+
 const AiAssistant: React.FC<AiAssistantProps> = ({ onAction, onToggleScanner, onAnalyze, onComposeEmail, isLoading, error, variables, disabled }) => {
     const [generatePrompt, setGeneratePrompt] = useState('');
     const [improvePrompt, setImprovePrompt] = useState('more professional');
@@ -30,28 +51,15 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onAction, onToggleScanner, on
             }
             contentToImprove = selection;
         }
-        
+
         const prompt = action === 'generate' ? generatePrompt : improvePrompt;
         onAction(action, prompt, contentToImprove);
     };
-    
+
     const insertVariable = (tag: string) => {
         const event = new CustomEvent('insertVariable', { detail: { variable: tag } });
         document.dispatchEvent(event);
     };
-
-    const AccordionSection: React.FC<{ title: string; id: string; children: React.ReactNode }> = ({ title, id, children }) => (
-        <div className="border-b border-slate-200 dark:border-slate-700">
-            <button
-                onClick={() => setActiveAccordion(activeAccordion === id ? null : id)}
-                className="w-full flex justify-between items-center p-4 text-left font-semibold"
-            >
-                <span>{title}</span>
-                <ChevronDownIcon className={`w-5 h-5 transition-transform ${activeAccordion === id ? 'rotate-180' : ''}`} />
-            </button>
-            {activeAccordion === id && <div className="p-4 pt-0">{children}</div>}
-        </div>
-    );
 
     return (
         <aside className="w-80 bg-slate-50 dark:bg-slate-900/50 border-l border-slate-200 dark:border-slate-700/50 flex flex-col h-full">
@@ -63,7 +71,12 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onAction, onToggleScanner, on
             </div>
 
             <div className={`flex-1 overflow-y-auto ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                 <AccordionSection title="Generate Content" id="generate">
+                <AccordionSection
+                    title="Generate Content"
+                    id="generate"
+                    activeAccordion={activeAccordion}
+                    setActiveAccordion={setActiveAccordion}
+                >
                     <textarea
                         value={generatePrompt}
                         onChange={(e) => setGeneratePrompt(e.target.value)}
@@ -76,7 +89,12 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onAction, onToggleScanner, on
                     </button>
                 </AccordionSection>
 
-                 <AccordionSection title="Compose Email" id="email">
+                <AccordionSection
+                    title="Compose Email"
+                    id="email"
+                    activeAccordion={activeAccordion}
+                    setActiveAccordion={setActiveAccordion}
+                >
                     <textarea
                         value={emailPrompt}
                         onChange={(e) => setEmailPrompt(e.target.value)}
@@ -85,31 +103,41 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onAction, onToggleScanner, on
                         rows={3}
                     />
                     <button onClick={() => onComposeEmail(emailPrompt)} disabled={isLoading || !emailPrompt} className="w-full mt-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-indigo-300 dark:disabled:bg-indigo-800 disabled:cursor-not-allowed flex items-center justify-center">
-                       <MailIcon className="w-4 h-4 mr-2" />
+                        <MailIcon className="w-4 h-4 mr-2" />
                         {isLoading ? 'Composing...' : 'Compose Email'}
                     </button>
                 </AccordionSection>
 
 
-                <AccordionSection title="Improve Selection" id="improve">
+                <AccordionSection
+                    title="Improve Selection"
+                    id="improve"
+                    activeAccordion={activeAccordion}
+                    setActiveAccordion={setActiveAccordion}
+                >
                     <p className="text-sm text-slate-500 mb-2">Select text in the editor to improve it.</p>
-                     <select 
+                    <select
                         value={improvePrompt}
                         onChange={(e) => setImprovePrompt(e.target.value)}
                         className="w-full p-2 border rounded-md bg-white dark:bg-slate-800 dark:border-slate-600 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                     >
-                         <option>more professional</option>
-                         <option>more friendly</option>
-                         <option>more concise</option>
-                         <option>more persuasive</option>
-                         <option>simpler</option>
-                     </select>
+                        <option>more professional</option>
+                        <option>more friendly</option>
+                        <option>more concise</option>
+                        <option>more persuasive</option>
+                        <option>simpler</option>
+                    </select>
                     <button onClick={() => handleAction('improve')} disabled={isLoading} className="w-full mt-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-indigo-300 dark:disabled:bg-indigo-800 disabled:cursor-not-allowed">
                         {isLoading ? 'Improving...' : 'Improve'}
                     </button>
                 </AccordionSection>
-                
-                 <AccordionSection title="Actions" id="actions">
+
+                <AccordionSection
+                    title="Actions"
+                    id="actions"
+                    activeAccordion={activeAccordion}
+                    setActiveAccordion={setActiveAccordion}
+                >
                     <div className="space-y-2">
                         <button onClick={() => handleAction('summarize')} disabled={isLoading} className="w-full px-4 py-2 bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200 rounded-md hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50">
                             {isLoading ? 'Summarizing...' : 'Summarize Letter'}
@@ -118,19 +146,24 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ onAction, onToggleScanner, on
                             <CameraIcon className="w-4 h-4 mr-2" />
                             Scan Document
                         </button>
-                         <button onClick={onAnalyze} disabled={isLoading} className="w-full px-4 py-2 bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200 rounded-md hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50 flex items-center justify-center">
+                        <button onClick={onAnalyze} disabled={isLoading} className="w-full px-4 py-2 bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200 rounded-md hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50 flex items-center justify-center">
                             <BeakerIcon className="w-4 h-4 mr-2" />
                             Analyze Document
                         </button>
                     </div>
                 </AccordionSection>
 
-                <AccordionSection title="Variables" id="variables">
+                <AccordionSection
+                    title="Variables"
+                    id="variables"
+                    activeAccordion={activeAccordion}
+                    setActiveAccordion={setActiveAccordion}
+                >
                     <div className="space-y-2">
                         {variables.map(v => (
                             <div key={v.tag} className="group flex items-center justify-between p-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700/50">
                                 <button onClick={() => insertVariable(v.tag)} className="text-left font-mono text-sm text-indigo-600 dark:text-indigo-400">
-                                  {v.tag}
+                                    {v.tag}
                                 </button>
                                 <InfoIcon className="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300" title={v.description} />
                             </div>
